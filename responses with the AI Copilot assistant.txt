@@ -1,3 +1,4 @@
+Stage 1:
 me: Create program "Hello World" on C++
 AI:
 
@@ -49,4 +50,31 @@ HOW TO COMPILE AND RUN:
    Execute the newly created program:
    ./hello
 
+
    (You should see "Hello, World!" appear on the screen).
+
+Stage 2:
+me: Generate a CMakeLists.txt for a C++17 project. The project name is "HelloWorld". It should build an executable named "hello" from the source file main.cpp.
+AI:
+
+``` name=CMakeLists.txt
+cmake_minimum_required(VERSION 3.10)
+
+project(HelloWorld LANGUAGES CXX)
+
+# Use C++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Build executable 'hello' from main.cpp
+add_executable(hello main.cpp)
+```
+
+I've provided a minimal CMakeLists.txt that sets C++17 and creates an executable named "hello" from main.cpp. To use it locally:
+
+- mkdir build && cd build
+- cmake ..
+- cmake --build . --config Release
+
+If you want, I can also add installation rules, tests, or set a specific minimum CMake version.
