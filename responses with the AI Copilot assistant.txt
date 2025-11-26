@@ -78,3 +78,123 @@ I've provided a minimal CMakeLists.txt that sets C++17 and creates an executable
 - cmake --build . --config Release
 
 If you want, I can also add installation rules, tests, or set a specific minimum CMake version.
+
+	
+Stage 3: 
+me:
+Create math_operations.h a C++ header and math_operations.cpp file with a declaration for a function named 'add' that takes two integers and returns their sum. Write unit tests for this files name them unit_tests.cpp.
+Update CmakeLists.txt to run test and add support of Google Test to the project.
+
+AI:
+Я додав(ла) реалізацію модуля з функцією add, тести GoogleTest та оновив(ла) CMakeLists.txt, щоб збирати як основний виконуваний файл, так і тестовий. Нижче — вміст файлів, які потрібно розмістити в корені репозиторію (та в каталозі tests).
+
+```cpp name=math_operations.h
+#ifndef MATH_OPERATIONS_H
+#define MATH_OPERATIONS_H
+
+// Declaration for add: returns the sum of two integers.
+int add(int a, int b);
+
+#endif // MATH_OPERATIONS_H
+```
+
+```cpp name=math_operations.cpp
+#include "math_operations.h"
+
+// Simple implementation returning the sum of two integers.
+int add(int a, int b) {
+    return a + b;
+}
+```
+
+````cpp name=tests/unit_tests.cpp
+#include <gtest/gtest.h>
+#include "math_operations.h"
+
+TEST(AddTest, PositiveNumbers) {
+    EXPECT_EQ(add(2, 3), 5);
+}
+
+TEST(AddTest, NegativeNumbers) {
+    EXPECT_EQ(add(-2, -3), -5);
+}
+
+TEST(AddTest, MixedSign) {
+    EXPECT_EQ(add(-2, 3), 1);
+    EXPECT_EQ(add(2, -3), -1);
+}
+
+TEST(AddTest, WithZero) {
+    EXPECT_EQ(add(0, 0), 0);
+    EXPECT_EQ(add(0, 5), 5);
+    EXPECT_EQ(add(5, 0), 5);
+}
+
+TEST(AddTest, LargeNumbers) {
+    EXPECT_EQ(add(1000000, 2000000), 3000000);
+}
+
+int main(int argc, char **argv) {
+    ::testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
+}
+````
+
+``` name=CMakeLists.txt
+cmake_minimum_required(VERSION 3.14)
+
+project(HelloWorld LANGUAGES CXX)
+
+# Use C++17
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+# Library for math operations
+add_library(math_operations STATIC math_operations.cpp)
+target_include_directories(math_operations PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+# Build executable 'hello' from main.cpp
+add_executable(hello main.cpp)
+target_link_libraries(hello PRIVATE math_operations)
+
+# GoogleTest setup via FetchContent
+include(FetchContent)
+
+FetchContent_Declare(
+  googletest
+  GIT_REPOSITORY https://github.com/google/googletest.git
+  GIT_TAG release-1.14.0
+)
+
+# Download and make available googletest
+FetchContent_MakeAvailable(googletest)
+
+enable_testing()
+
+# Test executable
+add_executable(unit_tests tests/unit_tests.cpp)
+target_link_libraries(unit_tests PRIVATE gtest_main math_operations)
+
+# Register tests with CTest / GoogleTest helper
+include(GoogleTest)
+gtest_discover_tests(unit_tests)
+```
+
+Що зроблено:
+- Додав(ла) math_operations.h і math_operations.cpp з реалізацією add.
+- Додав(ла) тести у tests/unit_tests.cpp, які використовують GoogleTest.
+- Оновив(ла) CMakeLists.txt: створюється бібліотека math_operations, збирається основний виконуваний файл hello, підключається GoogleTest через FetchContent, створюється тестовий виконуваний файл unit_tests і зареєстровані тести.
+
+Як зібрати й запустити тести локально:
+- mkdir build && cd build
+- cmake -S .. -B .
+- cmake --build . --config Debug
+- ctest --output-on-failure
+Або запустити тестовий виконуваний файл напряму:
+- ./unit_tests
+
+Якщо хочете, я можу:
+- Згенерувати commit-повідомлення та підготувати patch, або
+- Спробувати запушити файли в репозиторій (потрібен дозвіл на доступ).
+
