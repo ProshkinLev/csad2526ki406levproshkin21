@@ -1,38 +1,36 @@
 cmake_minimum_required(VERSION 3.14)
+project(HelloWorld CXX)
 
-project(HelloWorld LANGUAGES CXX)
-
-# Use C++17
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Library for math operations
-add_library(math_operations STATIC math_operations.cpp)
-target_include_directories(math_operations PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+# Основна програма
+add_executable(hello main.cpp math_operations.cpp)
 
-# Build executable 'hello' from main.cpp
-add_executable(hello main.cpp)
-target_link_libraries(hello PRIVATE math_operations)
-
-# GoogleTest setup via FetchContent
+# Налаштування тестів
+enable_testing()
 include(FetchContent)
 
 FetchContent_Declare(
   googletest
   GIT_REPOSITORY https://github.com/google/googletest.git
-  GIT_TAG release-1.14.0
+  GIT_TAG        main
 )
 
-# Download and make available googletest
+# Важливо для Windows: використовувати спільну бібліотеку runtime
+set(gtest_force_shared_crt ON)
+
 FetchContent_MakeAvailable(googletest)
 
-enable_testing()
+# Створення тестового файлу
+# Зверніть увагу: ми вказуємо шлях tests/unit_tests.cpp
+add_executable(run_tests tests/unit_tests.cpp math_operations.cpp)
 
-# Test executable
-add_executable(unit_tests tests/unit_tests.cpp)
-target_link_libraries(unit_tests PRIVATE gtest_main math_operations)
+# === ОСЬ ЦЕЙ РЯДОК ВИПРАВЛЯЄ ПОМИЛКУ ===
+# Він каже компілятору шукати math_operations.h у папці з CMakeLists.txt
+target_include_directories(run_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Register tests with CTest / GoogleTest helper
+target_link_libraries(run_tests GTest::gtest_main)
+
 include(GoogleTest)
-gtest_discover_tests(unit_tests)
+gtest_discover_tests(run_tests)
